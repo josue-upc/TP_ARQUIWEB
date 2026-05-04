@@ -1,0 +1,81 @@
+package com.upc.trabajoparcial.Servicios;
+
+import com.upc.trabajoparcial.DTOs.UsuarioDTO;
+import com.upc.trabajoparcial.Entidades.RolEntidad;
+import com.upc.trabajoparcial.Entidades.UsuarioEntidad;
+import com.upc.trabajoparcial.Repositorios.RolRepositorio;
+import com.upc.trabajoparcial.Repositorios.UsuarioRepositorio;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class UsuarioServicio {
+
+    @Autowired
+    private UsuarioRepositorio usuarioRepository;
+
+    @Autowired
+    private RolRepositorio rolRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    public UsuarioDTO create(UsuarioDTO usuarioDTO) {
+        UsuarioEntidad usuario = modelMapper.map(usuarioDTO, UsuarioEntidad.class);
+
+        // Buscamos el rol en la base de datos y se lo asignamos al usuario
+        RolEntidad rol = rolRepository.findById(usuarioDTO.getRolId())
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        usuario.setRolEntidad(rol);
+
+        if(usuario.getTotalPoints() == null) {
+            usuario.setTotalPoints(0);
+        }
+
+        usuario = usuarioRepository.save(usuario);
+        return mapToDTO(usuario);
+    }
+
+    public List<UsuarioDTO> listAll() {
+        return usuarioRepository.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public UsuarioDTO update(Long id, UsuarioDTO usuarioDTO) {
+        UsuarioEntidad usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        usuario.setName(usuarioDTO.getName());
+        usuario.setEmail(usuarioDTO.getEmail());
+        usuario.setPasswordHash(usuarioDTO.getPasswordHash());
+        usuario.setPauseThresholdMinutes(usuarioDTO.getPauseThresholdMinutes());
+        usuario.setDailyGoalMinutes(usuarioDTO.getDailyGoalMinutes());
+        usuario.setTotalPoints(usuarioDTO.getTotalPoints());
+
+        // Actualizamos el rol si es necesario
+        RolEntidad rol = rolRepository.findById(usuarioDTO.getRolId())
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        usuario.setRolEntidad(rol);
+
+        usuario = usuarioRepository.save(usuario);
+        return mapToDTO(usuario);
+    }
+
+    public void delete(Long id) {
+        usuarioRepository.deleteById(id);
+    }
+
+    // Método auxiliar para evitar problemas cíclicos al mapear hacia el DTO
+    private UsuarioDTO mapToDTO(UsuarioEntidad usuario) {
+        UsuarioDTO dto = modelMapper.map(usuario, UsuarioDTO.class);
+        if (usuario.getRolEntidad() != null) {
+            dto.setRolId(usuario.getRolEntidad().getId());
+        }
+        return dto;
+    }
+}
