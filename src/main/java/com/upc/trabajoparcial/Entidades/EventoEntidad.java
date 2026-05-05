@@ -1,4 +1,4 @@
-package com.upc.trabajoparcial.entidad;
+package com.upc.trabajoparcial.Entidades;
 
 import com.upc.trabajoparcial.entidad.enums.EventoTipo;
 import jakarta.persistence.*;
