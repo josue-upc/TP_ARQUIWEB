@@ -20,7 +20,7 @@ public class EventoEntidad {
     private UsuarioEntidad user;
 
     @Enumerated(EnumType.STRING)
-    private EventoTipo type;
+    private EventoType type;
 
     @Column(nullable = false)
     private String title;
