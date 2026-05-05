@@ -1,6 +1,5 @@
-package com.upc.trabajoparcial.entidad;
+package com.upc.trabajoparcial.Entidades;
 
-import com.upc.trabajoparcial.entidad.enums.EventoTipo;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,7 +21,7 @@ public class EventoEntidad {
     private UsuarioEntidad user;
 
     @Enumerated(EnumType.STRING)
-    private EventoTipo type;
+    private EventoType type;
 
     @Column(nullable = false)
     private String title;
