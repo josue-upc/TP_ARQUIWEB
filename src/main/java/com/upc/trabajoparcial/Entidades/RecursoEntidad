@@ -1,0 +1,38 @@
+package com.upc.trabajoparcial.entidad;
+
+import com.upc.trabajoparcial.entidad.enums.RecursoCategoria;
+import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Entity
+@Table(name = "recurso")
+public class RecursoEntidad {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @Column(nullable = false)
+    private String title;
+
+    @Column(length = 1000)
+    private String description;
+
+    @Column(nullable = false)
+    private String url;
+
+    @Enumerated(EnumType.STRING)
+    private RecursoCategoria category;
+
+    @ManyToOne
+    @JoinColumn(name = "uploaded_by")
+    private UsuarioEntidad uploadedBy;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    // getters y setters
+}
