@@ -1,4 +1,4 @@
-package com.upc.trabajoparcial.DTO;
+package com.upc.trabajoparcial.DTOs;
 
 import com.upc.trabajoparcial.entidad.EventoType;
 import lombok.AllArgsConstructor;
