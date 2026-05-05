@@ -1,0 +1,60 @@
+package com.upc.trabajoparcial.Servicios;
+
+import com.upc.trabajoparcial.DTOs.LogroDTO;
+import com.upc.trabajoparcial.Entidades.LogroEntidad;
+import com.upc.trabajoparcial.Repositorios.LogroRepositorio;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class LogroServicio {
+
+    @Autowired
+    private LogroRepositorio logroRepositorio;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Transactional
+    public LogroDTO crear(LogroDTO dto) {
+        LogroEntidad entidad = modelMapper.map(dto, LogroEntidad.class);
+        entidad = logroRepositorio.save(entidad);
+        return modelMapper.map(entidad, LogroDTO.class);
+    }
+
+    public List<LogroDTO> listarTodos() {
+        return logroRepositorio.findAll().stream()
+                .map(logro -> modelMapper.map(logro, LogroDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    public LogroDTO buscarPorId(Long id) {
+        LogroEntidad entidad = logroRepositorio.findById(id)
+                .orElseThrow(() -> new RuntimeException("Logro no encontrado"));
+        return modelMapper.map(entidad, LogroDTO.class);
+    }
+
+    @Transactional
+    public LogroDTO actualizar(Long id, LogroDTO dto) {
+        LogroEntidad entidad = logroRepositorio.findById(id)
+                .orElseThrow(() -> new RuntimeException("Logro no encontrado"));
+
+        entidad.setNombre(dto.getNombre());
+        entidad.setDescripcion(dto.getDescripcion());
+        entidad.setPuntosRequeridos(dto.getPuntosRequeridos());
+        entidad.setIconoUrl(dto.getIconoUrl());
+
+        entidad = logroRepositorio.save(entidad);
+        return modelMapper.map(entidad, LogroDTO.class);
+    }
+
+    @Transactional
+    public void eliminar(Long id) {
+        logroRepositorio.deleteById(id);
+    }
+}
