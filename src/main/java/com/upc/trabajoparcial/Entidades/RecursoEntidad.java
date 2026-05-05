@@ -1,14 +1,21 @@
-package com.upc.trabajoparcial.entidad;
+package com.upc.trabajoparcial.Entidades;
 
-import com.upc.trabajoparcial.entidad.enums.RecursoCategoria;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "recurso")
+@Table(name = "resources")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class RecursoEntidad {
 
     @Id
