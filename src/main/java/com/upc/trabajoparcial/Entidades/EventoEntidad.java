@@ -35,5 +35,4 @@ public class EventoEntidad {
     private Boolean isRecurring;
 
     private String googleEventId;
-
 }
