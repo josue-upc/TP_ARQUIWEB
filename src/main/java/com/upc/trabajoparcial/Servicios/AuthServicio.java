@@ -13,12 +13,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.upc.trabajoparcial.Entidades.RolEntidad;
+import com.upc.trabajoparcial.Repositorios.RolRepositorio;
 
 @Service
 public class AuthServicio {
 
     @Autowired
     private UsuarioRepositorio usuarioRepositorio;
+
+    @Autowired
+    private RolRepositorio rolRepositorio;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -40,6 +45,12 @@ public class AuthServicio {
         // ¡IMPORTANTE! Encriptamos la contraseña antes de guardarla en la base de datos
         nuevoUsuario.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         nuevoUsuario.setTotalPoints(0);
+
+        Long idDelRol = (dto.getRolId() != null) ? dto.getRolId() : 1L;
+
+        RolEntidad rolAsignado = rolRepositorio.findById(idDelRol)
+                .orElseThrow(() -> new RuntimeException("Error: No existe el rol en la BD."));
+        nuevoUsuario.setRolEntidad(rolAsignado);
 
         usuarioRepositorio.save(nuevoUsuario);
 

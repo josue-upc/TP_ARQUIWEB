@@ -1,10 +1,16 @@
 package com.upc.trabajoparcial.Servicios;
 
 import com.upc.trabajoparcial.DTOs.ChatDTO;
+import com.upc.trabajoparcial.DTOs.MensajeDTO;
 import com.upc.trabajoparcial.Entidades.ChatEntidad;
+import com.upc.trabajoparcial.Entidades.MensajeEntidad;
+import com.upc.trabajoparcial.Entidades.UsuarioEntidad;
 import com.upc.trabajoparcial.Repositorios.ChatRepositorio;
+import com.upc.trabajoparcial.Repositorios.MensajeRepositorio;
+import com.upc.trabajoparcial.Repositorios.UsuarioRepositorio;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,8 +25,20 @@ public class ChatServicio {
     private ChatRepositorio repo;
 
     @Autowired
+    private MensajeRepositorio mensajeRepositorio;
+
+    @Autowired
+    private UsuarioRepositorio usuarioRepositorio;
+
+    @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
+    // ==========================================
+    // LO DE TU COMPAÑERO (CRUD BÁSICO DE CHAT)
+    // ==========================================
     public ChatDTO crear(ChatDTO dto) {
         ChatEntidad entidad = modelMapper.map(dto, ChatEntidad.class);
         return modelMapper.map(repo.save(entidad), ChatDTO.class);
@@ -42,8 +60,6 @@ public class ChatServicio {
         if (existente != null) {
             existente.setType(dto.getType());
             existente.setStatus(dto.getStatus());
-
-            // Lógica extra: Si se cambia el estado a CLOSED, guardamos la fecha exacta
             if (dto.getStatus() != null && dto.getStatus().name().equals("CLOSED") && existente.getClosedAt() == null) {
                 existente.setClosedAt(LocalDateTime.now());
             }
@@ -54,5 +70,38 @@ public class ChatServicio {
 
     public void eliminar(UUID id) {
         repo.deleteById(id);
+    }
+
+    // ==========================================
+    // TUS HISTORIAS DE USUARIO (US25 y US07)
+    // ==========================================
+
+    // US25: Revisar historial
+    public List<MensajeDTO> obtenerHistorial(UUID chatId) {
+        return mensajeRepositorio.findByChat_IdOrderByTimestampAsc(chatId)
+                .stream()
+                .map(m -> modelMapper.map(m, MensajeDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    // US07: Guardar y emitir por WebSockets
+    public MensajeDTO guardarYEnviarMensaje(MensajeDTO dto) {
+        ChatEntidad chat = repo.findById(dto.getChat().getId())
+                .orElseThrow(() -> new RuntimeException("Chat no encontrado"));
+        UsuarioEntidad sender = usuarioRepositorio.findById(dto.getSender().getId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        MensajeEntidad nuevoMensaje = new MensajeEntidad();
+        nuevoMensaje.setChat(chat);
+        nuevoMensaje.setSender(sender);
+        nuevoMensaje.setContent(dto.getContent());
+
+        MensajeEntidad guardado = mensajeRepositorio.save(nuevoMensaje);
+        MensajeDTO respuesta = modelMapper.map(guardado, MensajeDTO.class);
+
+        // Emitimos en tiempo real
+        messagingTemplate.convertAndSend("/topic/chat/" + chat.getId(), respuesta);
+
+        return respuesta;
     }
 }

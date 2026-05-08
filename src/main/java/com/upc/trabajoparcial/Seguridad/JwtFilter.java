@@ -21,7 +21,7 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // Aquí llamaremos al servicio que conecta la base de datos de tu compañero Josué
+    // Aquí llamaremos al servicio que conecta la base de datos de tu compañero Josué ME LEDER
     @Autowired
     private UserDetailsService userDetailsService;
 

@@ -1,10 +1,11 @@
 package com.upc.trabajoparcial.Controladores;
 
 import com.upc.trabajoparcial.DTOs.ChatDTO;
+import com.upc.trabajoparcial.DTOs.MensajeDTO;
 import com.upc.trabajoparcial.Servicios.ChatServicio;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.*; // Aquí ya arreglamos el import que estaba mal
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.UUID;
@@ -41,9 +42,15 @@ public class ChatControlador {
         service.eliminar(id);
     }
 
-    // --- CASCARÓN: US25 REVISAR HISTORIAL DE CHATS ---
-    @GetMapping("/historial")
-    public String obtenerHistorialChats() {
-        return "Cascarón: Aquí se devolverá la lista de conversaciones anteriores (US25)";
+    // US25: Revisar historial de chats
+    @GetMapping("/history")
+    public List<MensajeDTO> obtenerHistorial(@RequestParam UUID chatId) {
+        return service.obtenerHistorial(chatId);
+    }
+
+    // US07: Enviar Mensaje por WebSockets
+    @PostMapping("/messages")
+    public MensajeDTO enviarMensaje(@RequestBody MensajeDTO mensajeDTO) {
+        return service.guardarYEnviarMensaje(mensajeDTO);
     }
 }

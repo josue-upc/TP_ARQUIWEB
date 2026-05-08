@@ -1,0 +1,19 @@
+package com.upc.trabajoparcial.Repositorios;
+
+import com.upc.trabajoparcial.Entidades.RegistroDiarioEntidad;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface RegistroDiarioRepositorio extends JpaRepository<RegistroDiarioEntidad, Long>{
+
+    // US05: La BD suma automáticamente todos los minutos activos de un paciente
+    @Query("SELECT COALESCE(SUM(r.minutosActivos), 0) FROM RegistroDiarioEntidad r WHERE r.usuario.id = :usuarioId")
+    Integer sumarMinutosActivosPorUsuario(@Param("usuarioId") Long usuarioId);
+
+    // US05: La BD suma automáticamente todos los minutos de descanso
+    @Query("SELECT COALESCE(SUM(r.minutosDescanso), 0) FROM RegistroDiarioEntidad r WHERE r.usuario.id = :usuarioId")
+    Integer sumarMinutosDescansoPorUsuario(@Param("usuarioId") Long usuarioId);
+}
