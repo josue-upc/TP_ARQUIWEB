@@ -41,16 +41,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // No guardamos sesiones, usamos Tokens
                 .authorizeHttpRequests(auth -> auth
-                        // Rutas públicas de Swagger (Respetando el código de José)
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**",
-                                "/api-docs/**"
-                        ).permitAll()
-                        // Rutas públicas de Autenticación (Tu código para el Registro y Login)
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        // TODO LO DEMÁS QUEDA BLOQUEADO (Requiere Token)
+                        .requestMatchers("/api/v1/calendar/**").permitAll() // Agrega esto para probar sin complicaciones por ahora
                         .anyRequest().authenticated()
                 )
                 // Le decimos a Spring que nuestro guardia (JwtFilter) revisa la puerta antes que nadie
