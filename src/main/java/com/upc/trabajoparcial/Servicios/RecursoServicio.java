@@ -56,6 +56,14 @@ public class RecursoServicio {
         recursoRepositorio.deleteById(id);
     }
 
+    public List<RecursoDTO> listarRecursosRelajacion() {
+        return recursoRepositorio.findAll()
+                .stream()
+                .filter(r -> r.getCategory().name().equals("MEDITATION")
+                        || r.getCategory().name().equals("MUSIC"))
+                .map(x -> modelMapper.map(x, RecursoDTO.class))
+                .toList();
+    }
     public RecursoDTO subirArchivoYCrear(org.springframework.web.multipart.MultipartFile archivo, RecursoDTO dto) {
         try {
             // 1. Subir archivo a la nube

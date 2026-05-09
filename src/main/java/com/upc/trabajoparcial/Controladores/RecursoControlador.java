@@ -14,27 +14,39 @@ import java.util.List;
 public class RecursoControlador {
 
     @Autowired
-    private RecursoServicio recursoService;
+    private RecursoServicio recursoServicio;
 
     @PostMapping
     public ResponseEntity<RecursoDTO> crear(@RequestBody RecursoDTO dto) {
-        return new ResponseEntity<>(recursoService.crear(dto), HttpStatus.CREATED);
+        return new ResponseEntity<>(recursoServicio.crear(dto), HttpStatus.CREATED);
     }
 
     @GetMapping
     public ResponseEntity<List<RecursoDTO>> listarTodos() {
-        return new ResponseEntity<>(recursoService.listar(), HttpStatus.OK);
+        return new ResponseEntity<>(recursoServicio.listar(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<RecursoDTO> obtener(@PathVariable Long id) {
-        return new ResponseEntity<>(recursoService.obtener(id), HttpStatus.OK);
+        return new ResponseEntity<>(recursoServicio.obtener(id), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        recursoService.eliminar(id);
+        recursoServicio.eliminar(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    // US08: Buscar información para problemas específicos
+    @GetMapping("/search")
+    public ResponseEntity<List<RecursoDTO>> buscarInformacion() {
+        return new ResponseEntity<>(recursoServicio.listar(), HttpStatus.OK);
+    }
+
+    // US09: Realizar ejercicoos de relajación
+    @GetMapping("/relaxation")
+    public ResponseEntity<List<RecursoDTO>> ejerciciosRelajacion() {
+        return new ResponseEntity<>(recursoServicio.listarRecursosRelajacion(), HttpStatus.OK);
     }
 
     // US11: Subir materiales a la nube
@@ -43,6 +55,6 @@ public class RecursoControlador {
             @RequestPart("file") org.springframework.web.multipart.MultipartFile file,
             @RequestPart("recurso") RecursoDTO dto) {
 
-        return new ResponseEntity<>(recursoService.subirArchivoYCrear(file, dto), HttpStatus.CREATED);
+        return new ResponseEntity<>(recursoServicio.subirArchivoYCrear(file, dto), HttpStatus.CREATED);
     }
 }

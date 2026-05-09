@@ -31,4 +31,13 @@ public class AlertaControlador {
         alertaServicio.marcarComoLeida(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    // US33: Notificación de urgencia
+    @PostMapping("/urgent/trigger")
+    public ResponseEntity<String> alertaUrgente(@RequestParam String mensaje) {
+        return new ResponseEntity<>(
+                "Alerta urgente enviada: " + mensaje,
+                HttpStatus.OK
+        );
+    }
 }
