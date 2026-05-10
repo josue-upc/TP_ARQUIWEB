@@ -14,4 +14,7 @@ public class AlertaDTO {
     private String mensaje;
     private Boolean leido;
     private LocalDateTime fechaCreacion;
+    private Long patientId;
+    private String alertLevel;
+    private Integer excessMinutes;
 }
