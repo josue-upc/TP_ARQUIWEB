@@ -1,5 +1,6 @@
 package com.upc.trabajoparcial.Controladores;
 
+import com.upc.trabajoparcial.DTOs.AlertaDTO;
 import com.upc.trabajoparcial.DTOs.PsicologoDashboardDTO;
 import com.upc.trabajoparcial.Servicios.PsicologoServicio;
 import org.springframework.beans.factory.annotation.Autowired;
