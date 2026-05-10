@@ -63,6 +63,21 @@ public class UsuarioServicio {
         return modelMapper.map(usuario, UsuarioDTO.class);
     }
 
+    public void guardarMetaDiaria(Long usuarioId, Integer targetMinutes) {
+        UsuarioEntidad usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
+
+        usuario.setDailyGoalMinutes(targetMinutes);
+        usuarioRepository.save(usuario);
+    }
+
+    public Integer obtenerPuntos(Long usuarioId) {
+        UsuarioEntidad usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
+
+        return usuario.getTotalPoints() != null ? usuario.getTotalPoints() : 0;
+    }
+
     public List<UsuarioDTO> listAll() {
         return usuarioRepository.findAll().stream()
                 .map(this::mapToDTO)
@@ -93,7 +108,6 @@ public class UsuarioServicio {
         usuarioRepository.deleteById(id);
     }
 
-    // Método auxiliar para evitar problemas cíclicos al mapear hacia el DTO
     private UsuarioDTO mapToDTO(UsuarioEntidad usuario) {
         UsuarioDTO dto = modelMapper.map(usuario, UsuarioDTO.class);
         if (usuario.getRolEntidad() != null) {
