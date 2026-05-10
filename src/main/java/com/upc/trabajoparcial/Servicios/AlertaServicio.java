@@ -2,7 +2,9 @@ package com.upc.trabajoparcial.Servicios;
 
 import com.upc.trabajoparcial.DTOs.AlertaDTO;
 import com.upc.trabajoparcial.Entidades.AlertaEntidad;
+import com.upc.trabajoparcial.Entidades.UsuarioEntidad;
 import com.upc.trabajoparcial.Repositorios.AlertaRepositorio;
+import com.upc.trabajoparcial.Repositorios.UsuarioRepositorio;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,9 +22,27 @@ public class AlertaServicio {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private UsuarioRepositorio usuarioRepositorio;
+
+
     @Transactional
     public AlertaDTO crear(AlertaDTO dto) {
-        AlertaEntidad entidad = modelMapper.map(dto, AlertaEntidad.class);
+        AlertaEntidad entidad = new AlertaEntidad();
+        UsuarioEntidad receptor = usuarioRepositorio.findById(dto.getReceptorId())
+                .orElseThrow(() -> new RuntimeException("Receptor no encontrado"));
+        entidad.setReceptor(receptor);
+
+        if (dto.getEmisorAlertaId() != null) {
+            UsuarioEntidad emisor = usuarioRepositorio.findById(dto.getEmisorAlertaId())
+                    .orElseThrow(() -> new RuntimeException("Emisor no encontrado"));
+            entidad.setEmisorAlerta(emisor);
+        }
+
+        entidad.setTipo(dto.getTipo());
+        entidad.setMensaje(dto.getMensaje());
+        entidad.setLeido(false);entidad.setFechaCreacion(java.time.LocalDateTime.now());
+
         entidad = alertaRepositorio.save(entidad);
         return modelMapper.map(entidad, AlertaDTO.class);
     }
