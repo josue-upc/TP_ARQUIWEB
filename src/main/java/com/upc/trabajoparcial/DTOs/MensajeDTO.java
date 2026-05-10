@@ -1,6 +1,7 @@
 package com.upc.trabajoparcial.DTOs;
 
 import lombok.*;
+import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,6 +16,7 @@ public class MensajeDTO {
     private UUID id;
     private ChatDTO chat;
     private UsuarioDTO sender;
+    @NotBlank
     private String content;
     private LocalDateTime timestamp;
 }
