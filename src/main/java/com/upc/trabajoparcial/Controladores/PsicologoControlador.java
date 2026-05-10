@@ -18,6 +18,12 @@ public class PsicologoControlador {
     @Autowired
     private PdfServicio pdfServicio;
 
+    @PostMapping("/assign-patient")
+    public String asignarPaciente(@RequestParam Long psicologoId, @RequestParam Long pacienteId) {
+        servicio.asignarPaciente(psicologoId, pacienteId);
+        return "Paciente asignado exitosamente";
+    }
+
     // US32: Panel de indicadores clínicos
     @GetMapping("/dashboard/metrics")
     public PsicologoDashboardDTO obtenerMetricasDashboard(@RequestParam Long psicologoId) {
@@ -28,6 +34,11 @@ public class PsicologoControlador {
     @GetMapping("/patients/monitoring")
     public java.util.List<com.upc.trabajoparcial.DTOs.PatientMonitoreoDTO> monitorearPacientes(@RequestParam Long psicologoId) {
         return servicio.monitorearPacientes(psicologoId);
+    }
+
+    @GetMapping("/alerts/critical")
+    public List<AlertaDTO> listarAlertasCriticasHistoria(@RequestParam Long psychologistId) {
+        return servicio.getCriticalAlerts(psychologistId);
     }
 
     // US12: Exportar información del paciente
