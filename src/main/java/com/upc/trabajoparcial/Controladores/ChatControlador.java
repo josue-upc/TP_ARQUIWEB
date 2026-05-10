@@ -53,4 +53,9 @@ public class ChatControlador {
     public MensajeDTO enviarMensaje(@RequestBody MensajeDTO mensajeDTO) {
         return service.guardarYEnviarMensaje(mensajeDTO);
     }
+
+    @PostMapping("/emergencia/{patientId}")
+    public ChatDTO solicitarChatEmergencia(@PathVariable Long patientId) {
+        return service.solicitarChatEmergencia(patientId);
+    }
 }
