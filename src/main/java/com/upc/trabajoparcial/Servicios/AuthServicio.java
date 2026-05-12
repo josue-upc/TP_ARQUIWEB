@@ -3,7 +3,9 @@ package com.upc.trabajoparcial.Servicios;
 import com.upc.trabajoparcial.DTOs.AuthResDTO;
 import com.upc.trabajoparcial.DTOs.LoginReqDTO;
 import com.upc.trabajoparcial.DTOs.RegistroReqDTO;
+import com.upc.trabajoparcial.Entidades.RolEntidad;
 import com.upc.trabajoparcial.Entidades.UsuarioEntidad;
+import com.upc.trabajoparcial.Repositorios.RolRepositorio;
 import com.upc.trabajoparcial.Repositorios.UsuarioRepositorio;
 import com.upc.trabajoparcial.Seguridad.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.upc.trabajoparcial.Entidades.RolEntidad;
-import com.upc.trabajoparcial.Repositorios.RolRepositorio;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthServicio {
@@ -37,24 +38,34 @@ public class AuthServicio {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    @Transactional
     public AuthResDTO registrar(RegistroReqDTO dto) {
+        // 1. Validar si el correo ya existe
+        if (usuarioRepositorio.findByEmail(dto.getEmail()).isPresent()) {
+            throw new RuntimeException("Error: El correo electrónico ya está registrado.");
+        }
+
         UsuarioEntidad nuevoUsuario = new UsuarioEntidad();
         nuevoUsuario.setName(dto.getName());
         nuevoUsuario.setEmail(dto.getEmail());
-
-        // ¡IMPORTANTE! Encriptamos la contraseña antes de guardarla en la base de datos
-        nuevoUsuario.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         nuevoUsuario.setTotalPoints(0);
 
-        Long idDelRol = (dto.getRolId() != null) ? dto.getRolId() : 1L;
+        // 2. Encriptamos la contraseña de forma segura
+        nuevoUsuario.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
 
-        RolEntidad rolAsignado = rolRepositorio.findById(idDelRol)
-                .orElseThrow(() -> new RuntimeException("Error: No existe el rol en la BD."));
+        // 3. Asignación de Rol Inteligente (Busca por nombre, no por ID)
+        // Lógica: Si mandan rolId = 2 en el JSON, es Psicólogo. Si no mandan nada o mandan 1, es Paciente.
+        String nombreABuscar = (dto.getRolId() != null && dto.getRolId() == 2L) ? "PSICOLOGO" : "PACIENTE";
+
+        RolEntidad rolAsignado = rolRepositorio.findByName(nombreABuscar)
+                .orElseThrow(() -> new RuntimeException("Error crítico: El rol " + nombreABuscar + " no existe. Revisa el DataInitializer."));
+
         nuevoUsuario.setRolEntidad(rolAsignado);
 
+        // 4. Guardar usuario en la base de datos
         usuarioRepositorio.save(nuevoUsuario);
 
-        // Generamos el token inmediatamente después de registrarse
+        // 5. Generar Token inmediatamente
         UserDetails userDetails = userDetailsService.loadUserByUsername(nuevoUsuario.getEmail());
         String token = jwtUtil.generarToken(userDetails);
 
@@ -62,12 +73,11 @@ public class AuthServicio {
     }
 
     public AuthResDTO login(LoginReqDTO dto) {
-        // Spring Security verifica que la contraseña enviada coincida con el hash de la BD
+        // Verificación de credenciales con Spring Security
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword())
         );
 
-        // Si la autenticación es exitosa, generamos y devolvemos el token
         UserDetails userDetails = userDetailsService.loadUserByUsername(dto.getEmail());
         String token = jwtUtil.generarToken(userDetails);
 

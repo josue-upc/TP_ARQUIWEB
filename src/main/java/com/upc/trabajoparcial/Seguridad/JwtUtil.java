@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -27,8 +28,14 @@ public class JwtUtil {
     }
 
     public String generarToken(UserDetails userDetails) {
+        // Extraemos los roles del userDetails para meterlos en el JWT
+        String role = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst().orElse("");
+
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
+                .claim("role", role) // <--- ¡ESTO FALTABA! Ahora el rol viaja en el token
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)

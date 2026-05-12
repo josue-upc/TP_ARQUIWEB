@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/calendar/**").permitAll() // Agrega esto para probar sin complicaciones por ahora
+                        .requestMatchers("/api/v1/resources/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 // Le decimos a Spring que nuestro guardia (JwtFilter) revisa la puerta antes que nadie

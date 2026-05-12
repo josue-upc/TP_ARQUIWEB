@@ -18,16 +18,17 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private UsuarioRepositorio usuarioRepositorio;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // 1. Buscamos al usuario usando el método nuevo (el 'username' en realidad será el correo del usuario)
-        UsuarioEntidad usuario = usuarioRepositorio.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con el correo: " + username));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        UsuarioEntidad usuario = usuarioRepositorio.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + email));
 
-        // 2. Traducimos tu UsuarioEntidad usando los getters correctos de Josué
-        return new User(
-                usuario.getEmail(),        // ¡Corregido!
-                usuario.getPasswordHash(), // ¡Corregido!
-                new ArrayList<>()
-        );
+        // Estandarizamos el rol con el prefijo ROLE_ que exige Spring
+        String nombreRol = "ROLE_" + usuario.getRolEntidad().getName().toUpperCase();
+
+        return User.builder()
+                .username(usuario.getEmail())
+                .password(usuario.getPasswordHash())
+                .authorities(nombreRol)
+                .build();
     }
 }
