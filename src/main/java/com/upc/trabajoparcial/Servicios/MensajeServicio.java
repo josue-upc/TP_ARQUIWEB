@@ -1,8 +1,12 @@
 package com.upc.trabajoparcial.Servicios;
 
 import com.upc.trabajoparcial.DTOs.MensajeDTO;
+import com.upc.trabajoparcial.Entidades.ChatEntidad;
 import com.upc.trabajoparcial.Entidades.MensajeEntidad;
+import com.upc.trabajoparcial.Entidades.UsuarioEntidad;
+import com.upc.trabajoparcial.Repositorios.ChatRepositorio;
 import com.upc.trabajoparcial.Repositorios.MensajeRepositorio;
+import com.upc.trabajoparcial.Repositorios.UsuarioRepositorio;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,11 +21,37 @@ public class MensajeServicio {
     @Autowired
     private MensajeRepositorio repo;
 
+    // ¡Agregamos los repositorios que faltaban!
+    @Autowired
+    private UsuarioRepositorio usuarioRepositorio;
+
+    @Autowired
+    private ChatRepositorio chatRepositorio;
+
     @Autowired
     private ModelMapper modelMapper;
 
     public MensajeDTO crear(MensajeDTO dto) {
         MensajeEntidad entidad = modelMapper.map(dto, MensajeEntidad.class);
+
+        // 1. Asignamos manualmente al SENDER (Usuario)
+        if (dto.getSender() != null && dto.getSender().getId() != null) {
+            UsuarioEntidad sender = usuarioRepositorio.findById(dto.getSender().getId())
+                    .orElseThrow(() -> new RuntimeException("El usuario sender no existe"));
+            entidad.setSender(sender);
+        } else {
+            throw new RuntimeException("El sender es obligatorio para enviar un mensaje");
+        }
+
+        // 2. Asignamos manualmente al CHAT (OJO: aquí asumo que ChatEntidad usa UUID también)
+        if (dto.getChat() != null && dto.getChat().getId() != null) {
+            ChatEntidad chat = chatRepositorio.findById(dto.getChat().getId())
+                    .orElseThrow(() -> new RuntimeException("El chat no existe"));
+            entidad.setChat(chat);
+        } else {
+            throw new RuntimeException("El chat es obligatorio para enviar un mensaje");
+        }
+
         return modelMapper.map(repo.save(entidad), MensajeDTO.class);
     }
 
@@ -36,7 +66,6 @@ public class MensajeServicio {
         return entidad != null ? modelMapper.map(entidad, MensajeDTO.class) : null;
     }
 
-    // Usando la función extra del repositorio
     public List<MensajeDTO> listarPorChat(UUID chatId) {
         return repo.findByChat_IdOrderByTimestampAsc(chatId).stream()
                 .map(e -> modelMapper.map(e, MensajeDTO.class))
@@ -47,7 +76,6 @@ public class MensajeServicio {
         MensajeEntidad existente = repo.findById(id).orElse(null);
         if (existente != null) {
             existente.setContent(dto.getContent());
-            // En un chat real casi nunca se actualiza el sender o el chat, solo el texto
             return modelMapper.map(repo.save(existente), MensajeDTO.class);
         }
         return null;

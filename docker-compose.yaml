@@ -1,0 +1,50 @@
+services:
+  app:
+    image: 'docker-spring-boot-postgres:latest'
+    build:
+      context: .
+    container_name: app
+    ports:
+      - "6868:8080"
+    networks:
+      - my-network-name
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgre
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/db_trabajoParcial
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgre
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+      - SECURITY_JWT_SECRET=M1_CL4V3_S3CR3T4_M0Y_L4RG4_Y_S3GUR4_P4R4_3L_PR0Y3CT0
+      - SECURITY_JWT_EXPIRATION_MS=86400000
+
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: always
+    container_name: db
+    networks:
+      - my-network-name
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgre
+      - POSTGRES_DB=db_trabajoParcial
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d db_trabajoParcial"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:
+
+networks:
+  my-network-name:
+    name: springcloud

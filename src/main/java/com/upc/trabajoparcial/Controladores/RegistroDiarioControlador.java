@@ -16,15 +16,7 @@ import java.util.Map;
 @RequestMapping("/api/v1/emotions")
 public class RegistroDiarioControlador {
 
-    @Autowired
-    private RegistroDiarioServicio servicio;
-
-    // US39: POST /api/v1/emociones/registrar
-    @PostMapping("/emotions/log")
-    public RegistroDiarioDTO registrarEmocion(@RequestBody RegistroDiarioDTO dto) {
-        return servicio.registrarEmocion(dto);
-    }
-
+    // 1. Agrupamos todas las inyecciones de dependencias al inicio
     @Autowired
     private RegistroDiarioServicio servicio;
 
@@ -38,13 +30,19 @@ public class RegistroDiarioControlador {
     private UsuarioLogroServicio usuarioLogroServicio;
 
 
+    // US39: POST /api/v1/emotions/log
+    @PostMapping("/log")
+    public RegistroDiarioDTO registrarEmocion(@RequestBody RegistroDiarioDTO dto) {
+        return servicio.registrarEmocion(dto);
+    }
 
-    // US05: GET /api/v1/estadisticas/recibir
+    // US05: GET /api/v1/emotions/statistics/usage
     @GetMapping("/statistics/usage")
     public Map<String, Integer> obtenerEstadisticasTiempo(@RequestParam Long usuarioId) {
         return servicio.obtenerEstadisticas(usuarioId);
     }
 
+    // POST /api/v1/emotions/goals/daily
     @PostMapping("/goals/daily")
     public ResponseEntity<String> guardarMetaDiaria(
             @RequestParam Long usuarioId,
@@ -54,12 +52,14 @@ public class RegistroDiarioControlador {
         return ResponseEntity.ok("Meta guardada");
     }
 
+    // GET /api/v1/emotions/gamification/status
     @GetMapping("/gamification/status")
     public Map<String, Object> obtenerEstadoGamificacion(@RequestParam Long usuarioId) {
         Integer puntos = usuarioServicio.obtenerPuntos(usuarioId);
         return logroServicio.obtenerEstadoGamificacion(puntos);
     }
 
+    // GET /api/v1/emotions/users/{userId}/achievements
     @GetMapping("/users/{userId}/achievements")
     public Map<String, Object> listarLogrosUsuario(@PathVariable Long userId) {
         return usuarioLogroServicio.listarLogrosPorUsuario(userId);

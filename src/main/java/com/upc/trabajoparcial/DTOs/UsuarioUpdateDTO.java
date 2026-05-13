@@ -1,7 +1,11 @@
 package com.upc.trabajoparcial.DTOs;
 
-import lombok.Data;
+import lombok.*;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class UsuarioUpdateDTO {
     private String name;
