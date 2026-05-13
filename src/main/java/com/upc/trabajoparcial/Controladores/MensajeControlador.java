@@ -2,7 +2,8 @@ package com.upc.trabajoparcial.Controladores;
 
 import com.upc.trabajoparcial.DTOs.MensajeDTO;
 import com.upc.trabajoparcial.Servicios.MensajeServicio;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+// ¡ESTA ES LA IMPORTACIÓN CORRECTA!
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
