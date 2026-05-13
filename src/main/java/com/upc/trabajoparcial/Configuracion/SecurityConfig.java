@@ -38,17 +38,42 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+                // 1. Deshabilitar CSRF (Obligatorio para APIs REST con JWT)
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // No guardamos sesiones, usamos Tokens
+
+                // 2. Deshabilitar CORS o configurarlo para permitir Postman (Opcional pero recomendado)
+                .cors(cors -> cors.configurationSource(request -> {
+                    var corsConfiguration = new org.springframework.web.cors.CorsConfiguration();
+                    corsConfiguration.setAllowedOrigins(java.util.List.of("*"));
+                    corsConfiguration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+                    corsConfiguration.setAllowedHeaders(java.util.List.of("*"));
+                    return corsConfiguration;
+                }))
+
+                // 3. Configurar sesión Stateless
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // 4. Reglas de Autorización
                 .authorizeHttpRequests(auth -> auth
+                        // Rutas de documentación (Siempre públicas)
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**").permitAll()
+
+                        // Rutas de Autenticación (Registro y Login DEBEN ser públicas)
+                        // Usamos el prefijo exacto que tienes en tu controlador
+                        .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/calendar/**").permitAll() // Agrega esto para probar sin complicaciones por ahora
+
+                        // Liberamos estas temporalmente para que pruebes el flujo sin token hasta que el Login funcione
+                        .requestMatchers("/api/v1/calendar/**").permitAll()
                         .requestMatchers("/api/v1/resources/**").permitAll()
+
+                        // Cualquier otra ruta requiere el Token JWT
                         .anyRequest().authenticated()
                 )
-                // Le decimos a Spring que nuestro guardia (JwtFilter) revisa la puerta antes que nadie
+
+                // 5. Agregar tu guardia (JwtFilter)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+
                 .build();
     }
 }

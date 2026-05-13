@@ -16,8 +16,14 @@ public class CalendarController {
     @PostMapping("/event")
     public ResponseEntity<String> createEvent(@RequestBody CalendarEventDTO dto) {
         try {
-            googleCalendarService.crearEvento(dto.getSummary(), dto.getStartTime(), dto.getEndTime());
-            return ResponseEntity.ok("¡Evento creado exitosamente en Google Calendar!");
+            // Añadimos un cuarto parámetro (descripción por defecto) para cumplir con la firma del servicio
+            String googleEventId = googleCalendarService.crearEvento(
+                    dto.getSummary(),
+                    "Evento de prueba agendado directamente desde el endpoint simple.",
+                    dto.getStartTime(),
+                    dto.getEndTime()
+            );
+            return ResponseEntity.ok("¡Evento creado exitosamente en Google Calendar con ID: " + googleEventId + "!");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error al conectar con Google: " + e.getMessage());
         }

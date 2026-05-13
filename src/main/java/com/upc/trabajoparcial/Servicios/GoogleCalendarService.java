@@ -27,7 +27,7 @@ import java.util.List;
 @Service
 public class GoogleCalendarService {
 
-    private static final String APPLICATION_NAME = "Trabajo Parcial ArquiWeb";
+    private static final String APPLICATION_NAME = "StayCool UPC";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
     private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR);
@@ -49,7 +49,8 @@ public class GoogleCalendarService {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
-    public void crearEvento(String resumen, String fechaInicio, String fechaFin) throws IOException, GeneralSecurityException {
+    //ACTUALIZADO: Retorna String (Google ID) y recibe la descripción del evento
+    public String crearEvento(String resumen, String descripcion, String fechaInicio, String fechaFin) throws IOException, GeneralSecurityException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                 .setApplicationName(APPLICATION_NAME)
@@ -57,7 +58,7 @@ public class GoogleCalendarService {
 
         Event event = new Event()
                 .setSummary(resumen)
-                .setDescription("Cita de asesoría técnica programada desde el Sistema UPC.");
+                .setDescription(descripcion != null ? descripcion : "Cita programada desde la plataforma StayCool.");
 
         EventDateTime start = new EventDateTime()
                 .setDateTime(new com.google.api.client.util.DateTime(fechaInicio))
@@ -70,6 +71,9 @@ public class GoogleCalendarService {
         event.setEnd(end);
 
         event = service.events().insert("primary", event).execute();
-        System.out.printf("Evento creado: %s\n", event.getHtmlLink());
+        System.out.printf("Evento despachado a Google Calendar exitosamente: %s\n", event.getHtmlLink());
+
+        // Retornamos el ID al EventoServicio para que lo enlace en la base de datos local
+        return event.getId();
     }
 }

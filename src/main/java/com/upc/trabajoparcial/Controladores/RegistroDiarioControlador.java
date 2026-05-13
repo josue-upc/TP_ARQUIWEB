@@ -13,8 +13,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/emotions")
 public class RegistroDiarioControlador {
+
+    @Autowired
+    private RegistroDiarioServicio servicio;
+
+    // US39: POST /api/v1/emociones/registrar
+    @PostMapping("/emotions/log")
+    public RegistroDiarioDTO registrarEmocion(@RequestBody RegistroDiarioDTO dto) {
+        return servicio.registrarEmocion(dto);
+    }
 
     @Autowired
     private RegistroDiarioServicio servicio;
@@ -28,11 +37,7 @@ public class RegistroDiarioControlador {
     @Autowired
     private UsuarioLogroServicio usuarioLogroServicio;
 
-    // US39: POST /api/v1/emociones/registrar
-    @PostMapping("/emotions/log")
-    public RegistroDiarioDTO registrarEmocion(@RequestBody RegistroDiarioDTO dto) {
-        return servicio.registrarEmocion(dto);
-    }
+
 
     // US05: GET /api/v1/estadisticas/recibir
     @GetMapping("/statistics/usage")
