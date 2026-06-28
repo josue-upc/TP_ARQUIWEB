@@ -1,0 +1,1 @@
+import java.time.LocalDateTime; import java.time.format.DateTimeFormatter; public class TestFormatter { public static void main(String[] args) { try { System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern(" yyyy-MM-ddTHH:mm:ss-05:00\))); } catch (Exception e) { e.printStackTrace(); } } }
